@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study & Productivity Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%233b82f6'/%3E%3Cstop offset='100%25' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-size='58'%3E📚%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">📚</span>
+          <span class="logo-text">FocusTrack</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle dark mode">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-section="dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-section="add-entry">
+          <span class="nav-icon">⏱️</span>
+          <span>Log Time</span>
+        </button>
+        <button class="nav-item" data-section="pomodoro">
+          <span class="nav-icon">🍅</span>
+          <span>Focus Timer</span>
+        </button>
+        <button class="nav-item" data-section="todo">
+          <span class="nav-icon">✅</span>
+          <span>To-Do</span>
+        </button>
+        <button class="nav-item" data-section="habits">
+          <span class="nav-icon">🔁</span>
+          <span>Habits</span>
+        </button>
+        <button class="nav-item" data-section="journal">
+          <span class="nav-icon">📝</span>
+          <span>Journal & Reading</span>
+        </button>
+        <button class="nav-item" data-section="data">
+          <span class="nav-icon">💾</span>
+          <span>Data & Backup</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <p class="footer-text">FocusTrack · Personal Study</p>
+      </div>
+    </aside>
+
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Main content -->
+    <main class="main">
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="section active">
+        <header class="section-header">
+          <h1>Dashboard</h1>
+          <p class="subtitle">Your study & work overview</p>
+        </header>
+
+        <!-- Goals & Streaks -->
+        <div class="goals-streaks-row">
+          <div class="card goal-card">
+            <div class="goal-header">
+              <h3>Daily Goal</h3>
+              <button type="button" class="btn small secondary" id="editGoalsBtn">Edit goals</button>
+            </div>
+            <div class="goal-progress-wrap">
+              <div class="goal-ring" id="dailyGoalRing">
+                <svg viewBox="0 0 36 36">
+                  <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="ring-fill" id="dailyGoalRingFill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="ring-center">
+                  <span id="dailyGoalPct">0%</span>
+                </div>
+              </div>
+              <div class="goal-meta">
+                <div class="goal-current"><span id="dailyGoalCurrent">0h 0m</span> / <span id="dailyGoalTarget">2h 0m</span></div>
+                <div class="goal-status" id="dailyGoalStatus">Set a goal to track progress</div>
+              </div>
+            </div>
+            <div class="goal-progress-wrap weekly-goal">
+              <div class="progress-bar-bg tall">
+                <div class="progress-bar-fill" id="weeklyGoalFill"></div>
+              </div>
+              <div class="goal-meta inline">
+                <span class="stat-label">Weekly goal</span>
+                <span id="weeklyGoalText">0h / 10h</span>
+                <span id="weeklyGoalPctLabel">0%</span>
+              </div>
+            </div>
+          </div>
+          <div class="card streak-card">
+            <h3>Streaks</h3>
+            <div class="streak-stats">
+              <div class="streak-item">
+                <div class="streak-value" id="currentStreak">0</div>
+                <div class="streak-label">Current 🔥</div>
+              </div>
+              <div class="streak-item">
+                <div class="streak-value" id="longestStreak">0</div>
+                <div class="streak-label">Longest</div>
+              </div>
+            </div>
+            <p class="streak-hint" id="streakHint">Log a session today to start a streak</p>
+          </div>
+        </div>
+
+        <!-- Goals edit panel (hidden by default) -->
+        <div class="card goals-edit-card" id="goalsEditCard" style="display:none;">
+          <h3>Set Goals</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="goalDailyHours">Daily study goal (hours)</label>
+              <input type="number" id="goalDailyHours" min="0" max="24" step="0.25" value="2" />
+            </div>
+            <div class="form-group">
+              <label for="goalWeeklyHours">Weekly study goal (hours)</label>
+              <input type="number" id="goalWeeklyHours" min="0" max="168" step="0.5" value="10" />
+            </div>
+          </div>
+          <p class="form-hint">Goals count study time only (excludes “Job Work”). Streak counts any day with ≥1 logged session.</p>
+          <div class="form-actions">
+            <button type="button" class="btn primary" id="saveGoalsBtn">Save Goals</button>
+            <button type="button" class="btn secondary" id="cancelGoalsBtn">Cancel</button>
+          </div>
+        </div>
+
+        <div class="view-tabs">
+          <button class="view-tab active" data-view="daily">Daily</button>
+          <button class="view-tab" data-view="weekly">Weekly</button>
+          <button class="view-tab" data-view="monthly">Monthly</button>
+        </div>
+
+        <!-- Daily View -->
+        <div id="view-daily" class="view-panel active">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">Today's Total</div>
+              <div class="stat-value" id="dailyTotalHours">0h 0m</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Study</div>
+              <div class="stat-value" id="dailyStudyHours">0h 0m</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Job Work</div>
+              <div class="stat-value" id="dailyJobHours">0h 0m</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sessions</div>
+              <div class="stat-value" id="dailySessions">0</div>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="card chart-card">
+              <h3>By Subject</h3>
+              <div class="chart-wrap">
+                <canvas id="dailySubjectChart"></canvas>
+              </div>
+              <p class="empty-chart" id="dailySubjectEmpty">No data for today yet.</p>
+            </div>
+            <div class="card chart-card">
+              <h3>By Topic</h3>
+              <div class="chart-wrap">
+                <canvas id="dailyTopicChart"></canvas>
+              </div>
+              <p class="empty-chart" id="dailyTopicEmpty">No data for today yet.</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Today's Entries</h3>
+            <div id="todayEntriesList" class="entries-list"></div>
+            <p class="empty-state" id="todayEntriesEmpty">No entries yet — log your first session!</p>
+          </div>
+        </div>
+
+        <!-- Weekly View -->
+        <div id="view-weekly" class="view-panel">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">This Week</div>
+              <div class="stat-value" id="weeklyTotalHours">0h 0m</div>
+            </div>
+            <div class="stat-card wide">
+              <div class="stat-label">Top Subjects</div>
+              <div class="stat-value small" id="weeklyTopSubjects">—</div>
+            </div>
+          </div>
+          <div class="export-bar">
+            <button type="button" class="btn primary" id="exportWeeklyBtn" title="Download this week's progress">
+              ⬇ Export CSV / TXT
+            </button>
+            <button type="button" class="btn secondary" id="printWeeklyBtn" title="Printable weekly report">
+              🖨 Print / PDF Report
+            </button>
+            <span class="export-hint">Current week Mon–Sun</span>
+          </div>
+
+          <div class="card compare-card" id="weekCompareCard">
+            <h3>This Week vs Last Week</h3>
+            <div class="compare-grid" id="weekCompareGrid">
+              <div class="compare-col">
+                <div class="compare-label">This week</div>
+                <div class="compare-value" id="compareThisTotal">0h</div>
+                <div class="compare-sub" id="compareThisDetail">—</div>
+              </div>
+              <div class="compare-delta" id="compareDelta">—</div>
+              <div class="compare-col">
+                <div class="compare-label">Last week</div>
+                <div class="compare-value" id="compareLastTotal">0h</div>
+                <div class="compare-sub" id="compareLastDetail">—</div>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:180px;margin-top:1rem;">
+              <canvas id="compareBarChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <h3>Hours per Day (Mon–Sun)</h3>
+            <div class="chart-wrap tall">
+              <canvas id="weeklyBarChart"></canvas>
+            </div>
+            <p class="empty-chart" id="weeklyBarEmpty">No data this week yet.</p>
+          </div>
+        </div>
+
+        <!-- Monthly View -->
+        <div id="view-monthly" class="view-panel">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">This Month</div>
+              <div class="stat-value" id="monthlyTotalHours">0h 0m</div>
+            </div>
+            <div class="stat-card wide">
+              <div class="stat-label">By Subject</div>
+              <div class="stat-value small" id="monthlyBySubject">—</div>
+            </div>
+          </div>
+          <div class="card chart-card">
+            <h3>Daily Totals (Current Month)</h3>
+            <div class="chart-wrap tall">
+              <canvas id="monthlyBarChart"></canvas>
+            </div>
+            <p class="empty-chart" id="monthlyBarEmpty">No data this month yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADD ENTRY / TIME TRACKING -->
+      <section id="add-entry" class="section">
+        <header class="section-header">
+          <h1>Log Time</h1>
+          <p class="subtitle">Record a study or work session</p>
+        </header>
+
+        <div class="card form-card">
+          <form id="entryForm">
+            <input type="hidden" id="entryId" value="" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="entryCategory">Category / Subject</label>
+                <div class="select-with-add">
+                  <select id="entryCategory" required>
+                    <option value="">Select category</option>
+                    <option value="Job Work">Job Work</option>
+                  </select>
+                  <button type="button" class="btn-icon" id="addCategoryBtn" title="Add new category">+</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="entryTopic">Topic / Sub-task</label>
+                <input type="text" id="entryTopic" placeholder="e.g. Algorithms, Meeting notes" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="entryDate">Date</label>
+                <input type="date" id="entryDate" required />
+              </div>
+              <div class="form-group">
+                <label>Duration</label>
+                <div class="duration-inputs">
+                  <input type="number" id="entryHours" min="0" max="23" value="0" placeholder="h" />
+                  <span>h</span>
+                  <input type="number" id="entryMinutes" min="0" max="59" value="0" placeholder="m" />
+                  <span>m</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="entryNotes">Notes (optional)</label>
+              <textarea id="entryNotes" rows="2" placeholder="What did you focus on?"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn primary" id="entrySubmitBtn">Add Entry</button>
+              <button type="button" class="btn secondary" id="entryCancelBtn" style="display:none;">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h3>All Logged Entries</h3>
+          </div>
+          <div class="search-filters">
+            <input type="search" id="entrySearch" placeholder="Search topic, notes, category…" class="search-input" />
+            <select id="filterCategory">
+              <option value="">All categories</option>
+            </select>
+            <select id="filterType">
+              <option value="">All types</option>
+              <option value="study">Study only</option>
+              <option value="job">Job Work only</option>
+            </select>
+            <input type="date" id="filterDateFrom" title="From" />
+            <input type="date" id="filterDateTo" title="To" />
+            <button type="button" class="btn small secondary" id="clearFilterBtn">Clear</button>
+          </div>
+          <div id="allEntriesList" class="entries-list"></div>
+          <p class="empty-state" id="allEntriesEmpty">No entries yet — add your first study session!</p>
+        </div>
+      </section>
+
+      <!-- POMODORO / FOCUS TIMER -->
+      <section id="pomodoro" class="section">
+        <header class="section-header">
+          <h1>Focus Timer</h1>
+          <p class="subtitle">Pomodoro sessions that log to your tracker</p>
+        </header>
+
+        <div class="pomodoro-layout">
+          <div class="card pomodoro-card">
+            <div class="pomo-mode-tabs">
+              <button type="button" class="pomo-mode active" data-mode="work">Focus</button>
+              <button type="button" class="pomo-mode" data-mode="short">Short break</button>
+              <button type="button" class="pomo-mode" data-mode="long">Long break</button>
+            </div>
+            <div class="pomo-display" id="pomoDisplay">25:00</div>
+            <div class="pomo-status" id="pomoStatus">Ready to focus</div>
+            <div class="pomo-controls">
+              <button type="button" class="btn primary" id="pomoStartBtn">Start</button>
+              <button type="button" class="btn secondary" id="pomoPauseBtn" disabled>Pause</button>
+              <button type="button" class="btn secondary" id="pomoResetBtn">Reset</button>
+            </div>
+            <div class="pomo-settings">
+              <div class="form-row three">
+                <div class="form-group">
+                  <label for="pomoWorkMin">Focus (min)</label>
+                  <input type="number" id="pomoWorkMin" min="1" max="120" value="25" />
+                </div>
+                <div class="form-group">
+                  <label for="pomoShortMin">Short break</label>
+                  <input type="number" id="pomoShortMin" min="1" max="60" value="5" />
+                </div>
+                <div class="form-group">
+                  <label for="pomoLongMin">Long break</label>
+                  <input type="number" id="pomoLongMin" min="1" max="60" value="15" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Log when session ends</h3>
+            <p class="form-hint">When a focus session finishes, you can save it as a time entry.</p>
+            <div class="form-group">
+              <label for="pomoCategory">Category</label>
+              <select id="pomoCategory"></select>
+            </div>
+            <div class="form-group">
+              <label for="pomoTopic">Topic</label>
+              <input type="text" id="pomoTopic" placeholder="e.g. Chapter 4, API design" />
+            </div>
+            <label class="checkbox-label">
+              <input type="checkbox" id="pomoAutoLog" checked />
+              Auto-log focus sessions when the timer completes
+            </label>
+            <div class="pomo-session-count">
+              Focus sessions today: <strong id="pomoTodayCount">0</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TO-DO -->
+      <section id="todo" class="section">
+        <header class="section-header">
+          <h1>To-Do List</h1>
+          <p class="subtitle">What I should do today</p>
+        </header>
+
+        <div class="card">
+          <div class="todo-progress">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="todoProgressFill"></div>
+            </div>
+            <span id="todoProgressText">0/0 tasks done</span>
+          </div>
+          <form id="todoForm" class="todo-form">
+            <input type="text" id="todoInput" placeholder="Add a task for today..." required />
+            <button type="submit" class="btn primary">Add</button>
+          </form>
+          <ul id="todoList" class="todo-list"></ul>
+          <p class="empty-state" id="todoEmpty">No tasks yet. Add something to do today!</p>
+          <div class="todo-actions">
+            <button type="button" class="btn secondary small" id="clearCompletedBtn">Clear completed</button>
+            <button type="button" class="btn secondary small" id="archiveTodosBtn">Archive today's list</button>
+          </div>
+        </div>
+
+        <div class="card" id="todoHistoryCard" style="display:none;">
+          <h3>Recent History</h3>
+          <div id="todoHistoryList" class="todo-history"></div>
+        </div>
+      </section>
+
+      <!-- JOURNAL & READING -->
+      <section id="journal" class="section">
+        <header class="section-header">
+          <h1>Journal & Reading</h1>
+          <p class="subtitle">Reflections and reading log</p>
+        </header>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>Daily Journal</h3>
+            <form id="journalForm">
+              <input type="hidden" id="journalId" value="" />
+              <div class="form-group">
+                <label for="journalDate">Date</label>
+                <input type="date" id="journalDate" required />
+              </div>
+              <div class="form-group">
+                <label for="journalText">Reflection / Notes</label>
+                <textarea id="journalText" rows="5" placeholder="How was your day? What did you learn?" required></textarea>
+              </div>
+              <label class="checkbox-label">
+                <input type="checkbox" id="journalReview" />
+                Tag for spaced review (surfaces after 1 / 3 / 7 days)
+              </label>
+              <div class="form-actions" style="margin-top:0.75rem;">
+                <button type="submit" class="btn primary" id="journalSubmitBtn">Save Entry</button>
+                <button type="button" class="btn secondary" id="journalCancelBtn" style="display:none;">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Reading Log</h3>
+            <form id="readingForm">
+              <input type="hidden" id="readingId" value="" />
+              <div class="form-group">
+                <label for="readingTitle">Book / Article Title</label>
+                <input type="text" id="readingTitle" placeholder="Title" required />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="readingProgress">Progress</label>
+                  <input type="text" id="readingProgress" placeholder="e.g. 45% or pages 12–30" />
+                </div>
+                <div class="form-group">
+                  <label for="readingDate">Date</label>
+                  <input type="date" id="readingDate" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="readingNotes">Notes / Thoughts</label>
+                <textarea id="readingNotes" rows="2" placeholder="Key takeaways..."></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn primary" id="readingSubmitBtn">Add Reading</button>
+                <button type="button" class="btn secondary" id="readingCancelBtn" style="display:none;">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="card review-due-card" id="reviewDueCard" style="display:none;">
+          <h3>📖 Due for review</h3>
+          <p class="form-hint">Notes tagged for spaced review that are ready today.</p>
+          <div id="reviewDueList" class="journal-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h3>Past Journal Entries</h3>
+            <button type="button" class="btn small secondary" id="openWeeklyReviewBtn">Weekly review</button>
+          </div>
+          <div id="journalList" class="journal-list"></div>
+          <p class="empty-state" id="journalEmpty">No journal entries yet.</p>
+        </div>
+
+        <div class="card">
+          <h3>Reading History</h3>
+          <div id="readingList" class="reading-list"></div>
+          <p class="empty-state" id="readingEmpty">No reading entries yet.</p>
+        </div>
+      </section>
+
+      <!-- HABITS -->
+      <section id="habits" class="section">
+        <header class="section-header">
+          <h1>Habits</h1>
+          <p class="subtitle">Recurring daily habits & weekly completion</p>
+        </header>
+        <div class="card">
+          <form id="habitForm" class="todo-form">
+            <input type="text" id="habitInput" placeholder="Add a habit (e.g. Review notes, Exercise)…" required />
+            <button type="submit" class="btn primary">Add</button>
+          </form>
+          <div class="habit-week-header" id="habitWeekHeader"></div>
+          <div id="habitsList" class="habits-list"></div>
+          <p class="empty-state" id="habitsEmpty">No habits yet. Add ones you want to do every day.</p>
+          <div class="habit-summary" id="habitSummary"></div>
+        </div>
+      </section>
+
+      <!-- DATA & BACKUP -->
+      <section id="data" class="section">
+        <header class="section-header">
+          <h1>Data & Backup</h1>
+          <p class="subtitle">Export, import, and protect your data</p>
+        </header>
+        <div class="card">
+          <h3>Full backup</h3>
+          <p class="form-hint">Download everything (entries, todos, journals, goals, habits, settings) as a single JSON file. Use it to move browsers or restore later.</p>
+          <div class="form-actions">
+            <button type="button" class="btn primary" id="backupBtn">⬇ Download backup (JSON)</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Restore from backup</h3>
+          <p class="form-hint">Import a previously exported JSON file. This <strong>replaces</strong> all current data.</p>
+          <input type="file" id="restoreFile" accept=".json,application/json" />
+          <div class="form-actions" style="margin-top:0.75rem;">
+            <button type="button" class="btn secondary" id="restoreBtn">Restore from file</button>
+          </div>
+        </div>
+        <div class="card danger-zone">
+          <h3>Danger zone</h3>
+          <p class="form-hint">Permanently delete all local data. This cannot be undone.</p>
+          <button type="button" class="btn danger-solid" id="clearAllDataBtn">Clear all data</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Floating mini Pomodoro -->
+  <div class="mini-pomo" id="miniPomo" style="display:none;">
+    <span class="mini-pomo-time" id="miniPomoTime">25:00</span>
+    <span class="mini-pomo-label" id="miniPomoLabel">Focus</span>
+    <button type="button" class="mini-pomo-btn" id="miniPomoToggle" title="Pause/Resume">⏸</button>
+    <button type="button" class="mini-pomo-btn" id="miniPomoOpen" title="Open timer">↗</button>
+  </div>
+
+  <!-- Modal for new category -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+      <h3>Add New Category</h3>
+      <input type="text" id="newCategoryInput" placeholder="e.g. Mathematics, Physics" />
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="cancelCategoryBtn">Cancel</button>
+        <button type="button" class="btn primary" id="saveCategoryBtn">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly review modal -->
+  <div class="modal-overlay" id="weeklyReviewModal">
+    <div class="modal modal-wide">
+      <h3>Weekly Review</h3>
+      <p class="form-hint">Reflect on the week. Your answers are saved as a journal entry.</p>
+      <div class="form-group">
+        <label for="reviewWins">What went well?</label>
+        <textarea id="reviewWins" rows="3" placeholder="Wins, progress, good habits…"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="reviewBlockers">What blocked you?</label>
+        <textarea id="reviewBlockers" rows="2" placeholder="Distractions, gaps, energy…"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="reviewFocus">Focus for next week</label>
+        <textarea id="reviewFocus" rows="2" placeholder="1–3 priorities…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="cancelWeeklyReviewBtn">Cancel</button>
+        <button type="button" class="btn primary" id="saveWeeklyReviewBtn">Save to Journal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable weekly report (hidden on screen, shown when printing) -->
+  <div id="printReport" class="print-report" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
